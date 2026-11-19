@@ -20,7 +20,7 @@ export default function AboutPage() {
       </h1>
       <div className="mt-10 max-w-2xl space-y-6 font-serif text-xl leading-snug font-light md:text-2xl">
         <p>
-          Based in Buenos Aires, I&rsquo;m a fashion stylist and fashion producer with a strong interest in visual
+          Based in Buenos Aires, I&rsquo;m a fashion stylist and producer with a strong interest in visual
           storytelling, aesthetics and creative direction.
         </p>
         <p>
