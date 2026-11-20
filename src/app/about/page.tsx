@@ -56,14 +56,14 @@ export default function AboutPage() {
         </Reveal>
       </div>
 
-      <div className="mt-20 flex w-full flex-col md:mt-28">
+      <div className="mt-20 flex w-full flex-col pb-16 md:mt-28 md:pb-24">
         <Reveal>
           <Section label="Contact">
             <Link
               href="/contact"
               className="font-serif text-2xl font-light underline decoration-1 underline-offset-8 transition-opacity hover:opacity-50 md:text-4xl"
             >
-              Let's talk about your next project →
+              Let&rsquo;s talk about your next project →
             </Link>
           </Section>
         </Reveal>

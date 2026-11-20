@@ -12,11 +12,11 @@ export default function ContactPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1600px] px-4 pt-12 md:px-10 md:pt-20">
+    <div className="mx-auto max-w-[1600px] px-4 pt-8 md:px-10 md:pt-14">
       <Reveal>
-        <h1 className="max-w-4xl font-serif text-5xl leading-[1.05] font-light md:text-8xl">Contact Me</h1>
+        <h1 className="font-sans text-sm font-medium tracking-[0.25em] uppercase md:text-base">Contact Me</h1>
       </Reveal>
-      <ul className="mt-16 border-t border-foreground/10 md:mt-24">
+      <ul className="mt-8 border-t border-foreground/10 md:mt-12">
         {items.map((it, i) => (
           <li key={it.label} className="border-b border-foreground/10">
             <Reveal delay={i * 120}>

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #f7f3ec;
   --foreground: #111111;
   --muted: #8a8a8a;
 }
@@ -36,6 +36,56 @@ body {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+}
+
+/* Header links: underline grows from the left on hover; stays on active page. */
+.nav-link {
+  position: relative;
+  transition: opacity 0.2s;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link:hover::after,
+.nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+/* Custom cursor (see components/Cursor.tsx) */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    width 0.25s,
+    height 0.25s,
+    opacity 0.2s;
+}
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot {
+    display: none;
   }
 }
 

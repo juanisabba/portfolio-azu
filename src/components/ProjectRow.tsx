@@ -1,36 +1,44 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Project } from "@/data/projects";
-import Reveal from "./Reveal";
+import { focusOf, type Project } from "@/data/projects";
 
-export default function ProjectRow({ project, priority = false }: { project: Project; priority?: boolean }) {
-  const href = `/projects/${project.slug}`;
+type Props = {
+  project: Project;
+  index?: number;
+  priority?: boolean;
+};
+
+/** First two photos of a project side by side, title and role overlaid on top. */
+export default function ProjectRow({ project, index = 0, priority = false }: Props) {
   return (
-    <Reveal>
-      <article className="group">
-        <Link href={href} className="mb-4 flex items-baseline justify-between gap-4 px-4 md:px-10">
-          <h2 className="text-sm font-medium tracking-[0.2em] uppercase">{project.title}</h2>
-          <span className="text-right text-xs tracking-[0.15em] text-muted uppercase">{project.role}</span>
-        </Link>
-        <div className="no-scrollbar flex snap-x gap-2 overflow-x-auto scroll-px-4 px-4 md:gap-3 md:scroll-px-10 md:px-10">
-          {project.images.map((src, i) => (
-            <Link
-              key={src}
-              href={href}
-              className="relative aspect-[3/4] w-[62vw] shrink-0 snap-start overflow-hidden bg-foreground/5 sm:w-[38vw] md:w-[24vw] lg:w-[19vw]"
-            >
-              <Image
-                src={src}
-                alt={`${project.title} — photo ${i + 1}`}
-                fill
-                priority={priority && i < 3}
-                sizes="(min-width:1024px) 19vw, (min-width:768px) 24vw, (min-width:640px) 38vw, 62vw"
-                className="object-cover transition-transform duration-700 ease-out hover:scale-[1.03]"
-              />
-            </Link>
-          ))}
-        </div>
-      </article>
-    </Reveal>
+    <Link href={`/projects/${project.slug}`} className="relative block">
+      <div className="grid grid-cols-2 gap-1">
+        {project.images.slice(0, 2).map((src, i) => (
+          <div key={src} className="relative aspect-[3/4] overflow-hidden bg-foreground/5">
+            <Image
+              src={src}
+              alt={`${project.title} — photo ${i + 1}`}
+              fill
+              priority={priority}
+              sizes="50vw"
+              className="object-cover"
+              style={{ objectPosition: focusOf(src) }}
+            />
+            {/* Dark-to-transparent fade keeps white text readable on light photos. */}
+            <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/55 via-black/25 to-transparent md:h-28" />
+          </div>
+        ))}
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-baseline justify-between gap-4 px-4 pt-3 text-white md:px-10 md:pt-5">
+        <h2 className="text-xs font-medium tracking-[0.2em] uppercase [text-shadow:0_1px_3px_rgb(0_0_0/0.35)] md:text-sm">
+          <span className="mr-3 opacity-70">{String(index + 1).padStart(2, "0")}</span>
+          {project.title}
+        </h2>
+        <span className="text-right text-[10px] tracking-[0.15em] uppercase opacity-80 [text-shadow:0_1px_3px_rgb(0_0_0/0.35)] md:text-xs">
+          {project.role}
+        </span>
+      </div>
+    </Link>
   );
 }
