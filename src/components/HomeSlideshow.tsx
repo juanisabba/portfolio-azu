@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { SPLASH_COOKIE, SPLASH_HIDE_SECONDS } from "@/data/splash";
+import InlineScript from "@/components/InlineScript";
+import {
+  SPLASH_COOKIE,
+  SPLASH_HIDE_SECONDS,
+  SPLASH_SKIP_ATTR,
+  SPLASH_SKIP_SCRIPT,
+  hasEnteredCookie,
+} from "@/data/splash";
 
 type Slide = {
   src: string;
@@ -60,15 +67,18 @@ export default function HomeSlideshow({ slides, interval = 312 }: Props) {
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(true);
   const [view, setView] = useState({ w: 0, h: 0 });
-  const [sizes, setSizes] = useState<Record<string, { w: number; h: number }>>({});
+  const [sizes, setSizes] = useState<Record<string, Size>>({});
 
   const isPhone = view.w > 0 && view.w < 768;
   const visible = isPhone ? slides.filter((s) => !s.desktopOnly) : slides;
   const count = visible.length;
 
+  // Already entered? The inline script set SPLASH_SKIP_ATTR before paint and
+  // CSS hides the intro; the effects below then skip preloading and scroll lock.
+
   // Lock page scroll behind the intro while it's showing.
   useEffect(() => {
-    if (!open) return;
+    if (!open || hasEnteredCookie()) return;
     const root = document.documentElement;
     root.style.overflow = "hidden";
     return () => {
@@ -78,14 +88,15 @@ export default function HomeSlideshow({ slides, interval = 312 }: Props) {
 
   const enter = () => {
     document.cookie = `${SPLASH_COOKIE}=1; max-age=${SPLASH_HIDE_SECONDS}; path=/; samesite=lax`;
+    document.documentElement.setAttribute(SPLASH_SKIP_ATTR, "");
     setOpen(false);
   };
 
-  // Preload every image so the fast swap never flashes blank frames.
-  // Slides play in the order given.
+  // Learn every photo's size (to frame it) before starting the slideshow.
   useEffect(() => {
+    if (hasEnteredCookie()) return;
     let loaded = 0;
-    const found: Record<string, { w: number; h: number }> = {};
+    const found: Record<string, Size> = {};
     slides.forEach(({ src }) => {
       const img = new Image();
       img.onload = img.onerror = () => {
@@ -115,50 +126,68 @@ export default function HomeSlideshow({ slides, interval = 312 }: Props) {
   }, []);
 
   if (!open) return null;
-  const slide = visible[index % count];
-  const size = sizes[slide.src];
-  const fitWidth = slide.fit === "width" && !!size && view.w / view.h < size.w / size.h;
-  // Photo may not fill the screen: show a blurred copy behind it.
-  const backdrop = fitWidth || (slide.zoom ?? 1) < 1;
+  const current = index % count;
+  const slide = visible[current];
+  const fitsWidth = (s: Slide) => {
+    const size = sizes[s.src];
+    return s.fit === "width" && !!size && view.w / view.h < size.w / size.h;
+  };
+  // Current photo may not fill the screen: show a blurred copy behind it.
+  const backdrop = fitsWidth(slide) || (slide.zoom ?? 1) < 1;
 
   return (
-    <section className="fixed inset-0 z-50 overflow-hidden bg-black">
-      {backdrop && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={slide.src}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl"
-        />
-      )}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={slide.src}
-        alt=""
-        aria-hidden="true"
-        style={fitWidth ? undefined : placeOn(slide.focus, slide.zoom ?? 1, size, view)}
-        className={`absolute ${fitWidth ? "inset-0 h-full w-full object-contain" : ""}`}
-      />
-      <div className="absolute inset-0 bg-black/30" />
+    <>
+      <InlineScript html={SPLASH_SKIP_SCRIPT} />
+      <section className="splash fixed inset-0 z-50 overflow-hidden bg-black">
+        {backdrop && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={slide.src}
+            src={slide.src}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl"
+          />
+        )}
+        {/* One <img> per photo, stacked; only the current one shows. Swapping
+            src on a single <img> briefly drew the old photo at the new size. */}
+        {visible.map((s, i) => {
+          const fit = fitsWidth(s);
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={s.src}
+              src={s.src}
+              alt=""
+              aria-hidden="true"
+              loading={i === 0 ? "eager" : "lazy"}
+              style={fit ? undefined : placeOn(s.focus, s.zoom ?? 1, sizes[s.src], view)}
+              className={`absolute ${fit ? "inset-0 h-full w-full object-contain" : ""} ${
+                i === current ? "" : "opacity-0"
+              }`}
+            />
+          );
+        })}
+        <div className="absolute inset-0 bg-black/30" />
 
-      <div className="relative flex h-full flex-col items-center justify-center gap-10 px-4 text-white">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="font-serif text-4xl tracking-[0.25em] uppercase md:text-6xl">
-            Azul Gogna
-          </p>
-          <p className="text-[10px] tracking-[0.3em] uppercase opacity-90 md:text-xs">
-            Fashion stylist &amp; producer
-          </p>
+        <div className="relative flex h-full flex-col items-center justify-center gap-10 px-4 text-white">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="font-serif text-4xl tracking-[0.25em] uppercase md:text-6xl">
+              Azul Gogna
+            </p>
+            <p className="text-[10px] tracking-[0.3em] uppercase opacity-90 md:text-xs">
+              Fashion stylist &amp; producer
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={enter}
+            className="border border-white px-10 py-3 text-xs tracking-[0.3em] uppercase transition-colors hover:bg-white hover:text-black"
+          >
+            Enter
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={enter}
-          className="border border-white px-10 py-3 text-xs tracking-[0.3em] uppercase transition-colors hover:bg-white hover:text-black"
-        >
-          Enter
-        </button>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

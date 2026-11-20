@@ -39,6 +39,11 @@ body {
   }
 }
 
+/* Home intro hidden before paint for returning visitors (see data/splash.ts). */
+html[data-splash-skip] .splash {
+  display: none;
+}
+
 /* Header links: underline grows from the left on hover; stays on active page. */
 .nav-link {
   position: relative;

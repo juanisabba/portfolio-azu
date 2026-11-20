@@ -1,7 +1,5 @@
-import { cookies } from "next/headers";
 import HomeSlideshow from "@/components/HomeSlideshow";
 import { focusOf } from "@/data/projects";
-import { SPLASH_COOKIE } from "@/data/splash";
 
 // Photos shown edge to edge horizontally instead of zoomed in to fill the screen.
 const FIT_WIDTH = new Set(["/projects/pinko/06.jpg"]);
@@ -41,9 +39,10 @@ const slides = [
   desktopOnly: DESKTOP_ONLY.has(src),
 }));
 
-/** Full-screen intro over the home page. Skipped while the "entered" cookie lives. */
-export default async function Splash() {
-  const entered = (await cookies()).has(SPLASH_COOKIE);
-  if (entered) return null;
+/**
+ * Full-screen intro over the home page. Always in the static HTML so it covers
+ * the page from the first paint; hidden pre-paint while the "entered" cookie lives.
+ */
+export default function Splash() {
   return <HomeSlideshow slides={slides} interval={450} />;
 }
