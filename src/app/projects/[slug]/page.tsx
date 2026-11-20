@@ -31,19 +31,11 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
           <h1 className="font-serif text-5xl leading-none font-light md:text-8xl">{project.title}</h1>
         </Reveal>
         <Reveal delay={150} className="self-end md:col-span-5">
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-xs tracking-[0.15em] uppercase">
-            <div>
-              <dt className="text-muted">Role</dt>
-              <dd className="mt-1">{project.role}</dd>
-            </div>
-            {project.client && (
-              <div>
-                <dt className="text-muted">Client</dt>
-                <dd className="mt-1">{project.client}</dd>
-              </div>
-            )}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-xs tracking-[0.15em] uppercase">
+            <p>{project.role}</p>
+            {project.client && <p>{project.client}</p>}
             <p className="col-span-2 mt-2 text-sm leading-relaxed tracking-normal normal-case">{project.description}</p>
-          </dl>
+          </div>
         </Reveal>
       </header>
 

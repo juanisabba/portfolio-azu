@@ -31,11 +31,11 @@ export default function ProjectRow({ project, index = 0, priority = false }: Pro
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-baseline justify-between gap-4 px-4 pt-3 text-white md:px-10 md:pt-5">
-        <h2 className="text-xs font-medium tracking-[0.2em] uppercase [text-shadow:0_1px_3px_rgb(0_0_0/0.35)] md:text-sm">
+        <h2 className="text-[10px] font-medium tracking-[0.2em] uppercase [text-shadow:0_1px_3px_rgb(0_0_0/0.35)] md:text-sm">
           <span className="mr-3 opacity-70">{String(index + 1).padStart(2, "0")}</span>
           {project.title}
         </h2>
-        <span className="text-right text-[10px] tracking-[0.15em] uppercase opacity-80 [text-shadow:0_1px_3px_rgb(0_0_0/0.35)] md:text-xs">
+        <span className="text-right text-[8px] tracking-[0.15em] uppercase opacity-80 [text-shadow:0_1px_3px_rgb(0_0_0/0.35)] md:text-xs">
           {project.role}
         </span>
       </div>
